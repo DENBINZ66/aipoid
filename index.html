@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Semantic Scholar Tracker - AI Research</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body { background: #0a0a0a; }
+        .glass { background: rgba(30,30,40,0.5); backdrop-filter: blur(10px); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-900 to-black min-h-screen text-white">
+    <div class="container mx-auto px-4 py-6 max-w-3xl">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-block p-3 bg-blue-600/20 rounded-2xl mb-3">
+                <i class="fas fa-graduation-cap text-4xl text-blue-500"></i>
+            </div>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                Semantic Scholar Tracker
+            </h1>
+            <p class="text-gray-400 mt-2">Cari paper akademik dari 200M+ database • Powered by Semantic Scholar</p>
+        </div>
+
+        <!-- Search Box -->
+        <div class="glass rounded-2xl p-5 mb-6 border border-gray-700">
+            <div class="flex flex-col sm:flex-row gap-3">
+                <input type="text" id="searchInput" placeholder="Cari paper... (contoh: artificial intelligence, quantum computing)" 
+                       class="flex-1 p-3 rounded-xl bg-gray-800/80 border border-gray-700 text-white focus:outline-none focus:border-blue-500 transition">
+                <button onclick="searchPapers()" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2">
+                    <i class="fas fa-search"></i> Cari
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Area -->
+        <div id="resultsArea" class="space-y-4 mb-8">
+            <div class="text-center text-gray-500 py-10">
+                <i class="fas fa-book-open text-4xl mb-3 opacity-50"></i>
+                <p>Ketik kata kunci, cari paper dari Semantic Scholar</p>
+                <p class="text-xs mt-2 text-gray-600">Database 200M+ paper • GRATIS</p>
+            </div>
+        </div>
+
+        <!-- Saved Papers -->
+        <div class="glass rounded-2xl p-5 border border-gray-700">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-bookmark text-yellow-500"></i> Saved Papers
+            </h2>
+            <div id="savedArea">
+                <p class="text-gray-500 text-center py-4">Belum ada paper tersimpan</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let savedPapers = [];
+
+        function loadSaved() {
+            const stored = localStorage.getItem('semanticPapers');
+            if (stored) {
+                savedPapers = JSON.parse(stored);
+            }
+            displaySaved();
+        }
+
+        function displaySaved() {
+            const savedDiv = document.getElementById('savedArea');
+            if (savedPapers.length === 0) {
+                savedDiv.innerHTML = '<p class="text-gray-500 text-center py-4"><i class="fas fa-inbox"></i> Belum ada paper tersimpan</p>';
+                return;
+            }
+            
+            savedDiv.innerHTML = savedPapers.map((paper, idx) => `
+                <div class="bg-gray-800/60 rounded-xl p-4 mb-3 border border-gray-700 hover:border-blue-500 transition">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-blue-300 text-sm mb-1">📄 ${paper.title.substring(0, 80)}${paper.title.length > 80 ? '...' : ''}</h3>
+                            <p class="text-gray-400 text-xs">${paper.authors}</p>
+                            <p class="text-gray-500 text-xs mt-1">📅 ${paper.year} | 📊 ${paper.citationCount} sitasi</p>
+                            <div class="flex gap-3 mt-2">
+                                <a href="${paper.url}" target="_blank" class="text-blue-400 text-xs hover:underline"><i class="fas fa-external-link-alt"></i> Baca Paper</a>
+                                <button onclick="removePaper(${idx})" class="text-red-400 text-xs hover:text-red-300"><i class="fas fa-trash"></i> Hapus</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removePaper(index) {
+            savedPapers.splice(index, 1);
+            localStorage.setItem('semanticPapers', JSON.stringify(savedPapers));
+            displaySaved();
+            showToast('🗑️ Paper dihapus');
+        }
+
+        function savePaper(paper) {
+            if (!savedPapers.find(p => p.paperId === paper.paperId)) {
+                savedPapers.push(paper);
+                localStorage.setItem('semanticPapers', JSON.stringify(savedPapers));
+                displaySaved();
+                showToast('✅ Paper tersimpan!');
+            } else {
+                showToast('⚠️ Paper sudah tersimpan');
+            }
+        }
+
+        function showToast(msg) {
+            let toast = document.createElement('div');
+            toast.className = 'fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-2 rounded-full text-sm z-50 border border-gray-600';
+            toast.innerHTML = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        async function searchPapers() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                showToast('Masukkan kata kunci pencarian!');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('resultsArea');
+            resultsDiv.innerHTML = `
+                <div class="text-center py-10">
+                    <i class="fas fa-spinner fa-spin text-3xl text-blue-500"></i>
+                    <p class="text-gray-400 mt-3">Mencari di Semantic Scholar: "${query}"...</p>
+                </div>
+            `;
+
+            try {
+                // Pake Semantic Scholar API (gratis, ga perlu API key untuk search dasar)
+                const url = `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=10&fields=title,authors,year,citationCount,url,paperId`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (!data.data || data.data.length === 0) {
+                    resultsDiv.innerHTML = `
+                        <div class="text-center py-10 text-gray-500">
+                            <i class="fas fa-search-minus text-4xl mb-3"></i>
+                            <p>Tidak ada paper ditemukan untuk "${query}"</p>
+                            <p class="text-xs mt-2">Coba kata kunci lain</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let resultsHtml = '';
+                for (const paper of data.data) {
+                    const title = paper.title || 'No title';
+                    const authors = paper.authors?.map(a => a.name.split(' ').pop()).join(', ') || 'Unknown';
+                    const year = paper.year || 'N/A';
+                    const citationCount = paper.citationCount || 0;
+                    const url = paper.url || '#';
+                    const paperId = paper.paperId;
+                    
+                    const paperData = { title, authors, year, citationCount, url, paperId };
+                    
+                    resultsHtml += `
+                        <div class="bg-gray-800/60 rounded-xl p-4 border border-gray-700 hover:border-blue-500 transition">
+                            <div class="flex justify-between items-start gap-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 flex-wrap mb-2">
+                                        <span class="text-xs text-green-400"><i class="fas fa-chart-line"></i> ${citationCount} sitasi</span>
+                                        <span class="text-xs bg-gray-700 px-2 py-0.5 rounded-full">${year}</span>
+                                        <span class="text-xs bg-blue-900/50 px-2 py-0.5 rounded-full">Semantic Scholar</span>
+                                    </div>
+                                    <h3 class="font-bold text-white text-base mb-2">${title.substring(0, 100)}${title.length > 100 ? '...' : ''}</h3>
+                                    <p class="text-gray-400 text-xs mb-2">👥 ${authors.substring(0, 80)}</p>
+                                    <div class="flex gap-3 mt-3">
+                                        <a href="${url}" target="_blank" class="text-blue-400 text-xs hover:underline"><i class="fas fa-external-link-alt"></i> Baca Paper</a>
+                                        <button onclick='savePaper(${JSON.stringify(paperData).replace(/'/g, "\\'")})' class="text-green-400 text-xs hover:text-green-300"><i class="fas fa-save"></i> Simpan</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                resultsDiv.innerHTML = `
+                    <div class="mb-3 text-sm text-gray-400"><i class="fas fa-database"></i> Ditemukan ${data.total || data.data.length} paper dari Semantic Scholar</div>
+                    ${resultsHtml}
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="text-center py-10 text-red-400">
+                        <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
+                        <p>Error: ${error.message}</p>
+                        <p class="text-xs mt-2">Coba lagi nanti</p>
+                    </div>
+                `;
+            }
+        }
+
+        loadSaved();
+    </script>
+</body>
+</html>
