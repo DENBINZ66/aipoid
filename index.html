@@ -2,383 +2,594 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Ryee.GPT AI - AI Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoderAI - ChatGPT Style x Netflix Theme</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        * { font-family: 'Inter', system-ui, sans-serif; }
-        body { background: #0a0a0a; }
-        
-        /* Chat bubble styling */
-        .message-user {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            border-radius: 20px 20px 4px 20px;
+        * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        body { 
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 100%);
+            background-attachment: fixed;
         }
-        .message-ai {
-            background: #1f1f2f;
-            border-radius: 20px 20px 20px 4px;
-            border: 1px solid #2a2a3a;
+        .code-font { font-family: 'Fira Code', 'Monaco', 'Consolas', monospace; }
+        .cyan-glow { box-shadow: 0 0 20px rgba(0, 255, 204, 0.3); }
+        .chat-bubble-user { 
+            background: linear-gradient(135deg, #00ffcc, #00b8a9);
+            border-radius: 18px 18px 4px 18px;
         }
-        
-        /* Code block styling */
-        pre {
-            background: #0a0a0f;
-            border-radius: 12px;
-            padding: 16px;
-            overflow-x: auto;
-            border: 1px solid #2a2a3a;
-            margin: 12px 0;
+        .chat-bubble-ai { 
+            background: #1e1e2a;
+            border: 1px solid rgba(0, 255, 204, 0.2);
+            border-radius: 18px 18px 18px 4px;
         }
-        code {
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 13px;
-            color: #10b981;
+        .typing-dots::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #00ffcc, transparent);
+            border-radius: 2px;
+            animation: typing 1.4s infinite;
         }
-        
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #1a1a1a; }
-        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
-        
-        /* Typing animation */
-        @keyframes pulse {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: scaleX(0.4); opacity: 0.4; }
+            30% { transform: scaleX(1); opacity: 1; }
         }
-        .typing-dot {
-            animation: pulse 1s infinite;
+        .hover-scale { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .hover-scale:hover { transform: translateY(-4px) scale(1.02); }
+        .code-highlight { 
+            background: #0d1117; 
+            border: 1px solid #30363d; 
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .preview-frame {
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            border-radius: 8px;
+            background: white;
+            min-height: 300px;
+        }
+        @media (max-width: 768px) {
+            .sidebar-hidden { transform: translateX(-100%); }
+            .chat-area-full { width: 100% !important; }
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-b from-gray-900 to-black">
-    
-    <!-- Header -->
-    <div class="border-b border-gray-800 bg-gray-900/50 backdrop-blur sticky top-0 z-10">
-        <div class="container mx-auto px-4 py-3 max-w-4xl flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-brain text-white text-xl"></i>
+<body class="min-h-screen text-white overflow-hidden">
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed left-0 top-0 h-full w-80 bg-[#111115] z-50 sidebar-hidden md:translate-x-0 transition-transform duration-300">
+        <!-- Header -->
+        <div class="p-6 border-b border-[#1e1e2a]">
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center cyan-glow">
+                    <span class="text-lg font-bold">/</span>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                        Ryee.GPT AI
-                    </h1>
-                    <p class="text-xs text-gray-500">Powered by AI • Bisa nerima script & code</p>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">CoderAI</h1>
+                    <p class="text-xs text-gray-400">Powered by Gemini</p>
                 </div>
             </div>
-            <button onclick="clearChat()" class="text-gray-400 hover:text-white transition">
-                <i class="fas fa-trash-alt"></i>
-            </button>
+            
+            <!-- Mode Toggle -->
+            <div class="flex space-x-2 mb-6">
+                <button id="chatModeBtn" class="flex-1 bg-[#1e1e2a] border border-cyan-500/30 rounded-lg px-4 py-2 text-sm font-medium hover:bg-cyan-500/10 transition-all hover-scale">
+                    💬 Chat Mode
+                </button>
+                <button id="codeModeBtn" class="flex-1 bg-[#1e1e2a] border border-cyan-500/30 rounded-lg px-4 py-2 text-sm font-medium hover:bg-cyan-500/10 transition-all hover-scale opacity-50">
+                    💻 Code Mode
+                </button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-2">
+                <button id="newChatBtn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-black font-medium py-3 px-4 rounded-xl hover-scale transition-all shadow-lg">
+                    ➕ New Chat
+                </button>
+                <button id="clearChatBtn" class="w-full bg-[#1e1e2a] border border-gray-600 hover:border-cyan-500/50 text-gray-300 hover:text-cyan-400 py-3 px-4 rounded-xl hover-scale transition-all">
+                    🗑️ Clear Chat
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat History -->
+        <div class="p-4 overflow-y-auto h-[calc(100vh-280px)]">
+            <h3 class="text-sm font-semibold text-gray-300 mb-4 flex items-center">
+                <span class="w-5 h-5 bg-cyan-500/20 rounded-full flex items-center justify-center mr-2">
+                    📝
+                </span>
+                Recent Chats
+            </h3>
+            <div id="chatHistory" class="space-y-2"></div>
+        </div>
+
+        <!-- Profile -->
+        <div class="p-4 border-t border-[#1e1e2a] mt-auto">
+            <div class="flex items-center space-x-3 p-3 bg-[#1e1e2a] rounded-xl hover-scale">
+                <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <span class="text-sm font-bold">👨</span>
+                </div>
+                <div>
+                    <p class="font-medium text-sm">User</p>
+                    <p class="text-xs text-gray-400">coderai@example.com</p>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <!-- Chat Area -->
-    <div class="container mx-auto px-4 py-6 max-w-4xl">
-        <div id="chatMessages" class="space-y-4 mb-32">
-            <!-- Welcome message -->
-            <div class="flex gap-3">
-                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-robot text-white text-xs"></i>
-                </div>
-                <div class="message-ai rounded-2xl px-5 py-3 max-w-[85%]">
-                    <p class="text-gray-200">Halo! Saya <span class="font-bold text-blue-400">Ryee.GPT AI</span>. Saya bisa bantu kamu dengan:</p>
-                    <ul class="mt-2 text-sm text-gray-300 space-y-1">
-                        <li>✅ <span class="text-green-400">Menulis & menjalankan kode</span> (JavaScript, HTML, CSS)</li>
-                        <li>✅ <span class="text-blue-400">Menjawab pertanyaan</span> tentang coding, AI, research</li>
-                        <li>✅ <span class="text-purple-400">Membuat script</span> dan menjalankannya langsung di sini</li>
-                        <li>✅ <span class="text-yellow-400">Mencari paper akademik</span> dari Semantic Scholar</li>
-                    </ul>
-                    <p class="text-xs text-gray-500 mt-3">💡 Coba kirim: "Buat kode HTML kalkulator" atau "Cari paper tentang AI"</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Input Area -->
-        <div class="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 via-gray-900 to-transparent pt-6 pb-4">
-            <div class="container mx-auto px-4 max-w-4xl">
-                <div class="bg-gray-800/80 rounded-2xl border border-gray-700 backdrop-blur">
-                    <textarea id="userInput" rows="2" placeholder="Ketik pesan atau kirim kode... Contoh: 'Buat script HTML yang menampilkan jam digital' atau 'Cari paper quantum computing'"
-                              class="w-full bg-transparent text-white p-4 rounded-2xl focus:outline-none resize-none" style="min-height: 60px;"></textarea>
-                    <div class="flex justify-between items-center px-4 pb-3">
-                        <div class="text-xs text-gray-500">
-                            <i class="fas fa-code"></i> Bisa nerima script / kode
+
+    <!-- Mobile Hamburger -->
+    <button id="mobileToggle" class="md:hidden fixed top-6 left-6 z-50 p-2 rounded-xl bg-[#111115]/90 backdrop-blur-sm hover:bg-[#111115] transition-all">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button>
+
+    <!-- Main Chat Area -->
+    <div class="md:ml-0 md:pl-80 h-screen flex flex-col chat-area-full transition-all duration-300">
+        <!-- Messages Container -->
+        <div id="messagesContainer" class="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+            <!-- Welcome Message -->
+            <div id="welcomeMessage" class="max-w-2xl mx-auto">
+                <div class="chat-bubble-ai p-6 text-sm">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span class="text-sm">🤖</span>
                         </div>
-                        <button onclick="sendMessage()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-xl font-semibold transition flex items-center gap-2">
-                            <i class="fas fa-paper-plane"></i> Kirim
-                        </button>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-semibold text-cyan-400 mb-2 text-sm">CoderAI</h4>
+                            <p class="whitespace-pre-wrap text-gray-200 leading-relaxed">
+Halo! Saya CoderAI 🤖
+Saya pakai Google Gemini AI. Saya bisa:
+- Chat biasa
+- /code [deskripsi] → generate kode
+- /save → simpan kode
+- /preview → preview kode
+
+Contoh: /code buat kalkulator HTML
+                            </p>
+                        </div>
                     </div>
                 </div>
-                <p class="text-center text-xs text-gray-600 mt-3">
-                    Ryee.GPT AI • Bisa eksekusi kode JavaScript/HTML/CSS langsung
-                </p>
+            </div>
+        </div>
+
+        <!-- Code Preview Area -->
+        <div id="codePreviewArea" class="hidden p-6 bg-[#0d1117] border-t border-[#30363d]">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-cyan-400">📱 Live Preview</h3>
+                <div class="flex space-x-2">
+                    <button id="togglePreviewBtn" class="p-2 hover:bg-white/10 rounded-lg transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                    </button>
+                    <button id="saveCodeBtn" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-black font-medium rounded-lg hover-scale transition-all">
+                        💾 Save Code
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                    <div class="code-highlight">
+                        <pre id="codeDisplay" class="p-4 text-sm overflow-x-auto text-green-400 code-font"><code></code></pre>
+                    </div>
+                </div>
+                <div>
+                    <iframe id="previewFrame" class="preview-frame w-full h-[400px] lg:h-[500px]"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-6 bg-[#111115] border-t border-[#1e1e2a]">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex space-x-3">
+                    <textarea 
+                        id="messageInput" 
+                        rows="1" 
+                        placeholder="Ketik pesan atau /code [deskripsi] untuk generate kode..."
+                        class="flex-1 bg-[#1e1e2a] border border-[#30363d] rounded-2xl px-5 py-4 text-sm resize-none focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                    ></textarea>
+                    <button 
+                        id="sendBtn" 
+                        class="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 rounded-2xl flex items-center justify-center hover-scale transition-all shadow-lg cyan-glow"
+                        disabled
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="errorMessage" class="mt-3 p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-300 text-sm hidden"></div>
             </div>
         </div>
     </div>
-    
-    <!-- Hidden iframe for code execution -->
-    <iframe id="codeRunner" style="display:none;"></iframe>
 
     <script>
-        let isProcessing = false;
-        
-        function addMessage(content, isUser = false, isCode = false) {
-            const chatDiv = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `flex gap-3 ${isUser ? 'justify-end' : ''}`;
-            
-            if (isUser) {
-                messageDiv.innerHTML = `
-                    <div class="message-user rounded-2xl px-5 py-3 max-w-[85%]">
-                        <div class="text-white whitespace-pre-wrap">${escapeHtml(content)}</div>
-                    </div>
-                    <div class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-user text-white text-xs"></i>
-                    </div>
-                `;
-            } else {
-                messageDiv.innerHTML = `
-                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-robot text-white text-xs"></i>
-                    </div>
-                    <div class="message-ai rounded-2xl px-5 py-3 max-w-[85%]">
-                        <div class="text-gray-200 whitespace-pre-wrap">${isCode ? '<i class="fas fa-code"></i> ' + escapeHtml(content) : escapeHtml(content)}</div>
-                    </div>
-                `;
-            }
-            
-            chatDiv.appendChild(messageDiv);
-            chatDiv.scrollTop = chatDiv.scrollHeight;
+        // Configuration
+        const CONFIG = {
+            API_KEY: 'AIzaSyArVZ4g2LuxvHCkITAeUmqzo38aF7fKuFM',
+            API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent',
+            MAX_HISTORY: 10
+        };
+
+        // State
+        let currentChatId = 'default';
+        let isCodeMode = false;
+        let isTyping = false;
+        let savedCode = '';
+        let chatHistory = JSON.parse(localStorage.getItem('coderai_chats') || '[]');
+
+        // DOM Elements
+        const elements = {
+            sidebar: document.getElementById('sidebar'),
+            mobileToggle: document.getElementById('mobileToggle'),
+            messagesContainer: document.getElementById('messagesContainer'),
+            messageInput: document.getElementById('messageInput'),
+            sendBtn: document.getElementById('sendBtn'),
+            chatHistory: document.getElementById('chatHistory'),
+            welcomeMessage: document.getElementById('welcomeMessage'),
+            errorMessage: document.getElementById('errorMessage'),
+            codePreviewArea: document.getElementById('codePreviewArea'),
+            codeDisplay: document.getElementById('codeDisplay'),
+            previewFrame: document.getElementById('previewFrame'),
+            chatModeBtn: document.getElementById('chatModeBtn'),
+            codeModeBtn: document.getElementById('codeModeBtn'),
+            newChatBtn: document.getElementById('newChatBtn'),
+            clearChatBtn: document.getElementById('clearChatBtn'),
+            saveCodeBtn: document.getElementById('saveCodeBtn'),
+            togglePreviewBtn: document.getElementById('togglePreviewBtn')
+        };
+
+        // Initialize
+        init();
+
+        function init() {
+            renderChatHistory();
+            setupEventListeners();
+            elements.messageInput.focus();
         }
-        
-        function addTypingIndicator() {
-            const chatDiv = document.getElementById('chatMessages');
-            const typingDiv = document.createElement('div');
-            typingDiv.id = 'typingIndicator';
-            typingDiv.className = 'flex gap-3';
-            typingDiv.innerHTML = `
-                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-robot text-white text-xs"></i>
-                </div>
-                <div class="message-ai rounded-2xl px-5 py-3">
-                    <div class="flex gap-1">
-                        <span class="typing-dot">●</span>
-                        <span class="typing-dot" style="animation-delay: 0.2s">●</span>
-                        <span class="typing-dot" style="animation-delay: 0.4s">●</span>
+
+        function setupEventListeners() {
+            // Mobile toggle
+            elements.mobileToggle.addEventListener('click', toggleSidebar);
+            
+            // Send button
+            elements.sendBtn.addEventListener('click', sendMessage);
+            
+            // Input events
+            elements.messageInput.addEventListener('input', handleInput);
+            elements.messageInput.addEventListener('keydown', handleKeydown);
+            
+            // Mode buttons
+            elements.chatModeBtn.addEventListener('click', () => toggleMode(false));
+            elements.codeModeBtn.addEventListener('click', () => toggleMode(true));
+            
+            // Action buttons
+            elements.newChatBtn.addEventListener('click', newChat);
+            elements.clearChatBtn.addEventListener('click', clearChat);
+            elements.saveCodeBtn.addEventListener('click', saveCode);
+            elements.togglePreviewBtn.addEventListener('click', togglePreview);
+        }
+
+        function toggleSidebar() {
+            elements.sidebar.classList.toggle('sidebar-hidden');
+        }
+
+        function handleInput() {
+            const hasText = elements.messageInput.value.trim().length > 0;
+            elements.sendBtn.disabled = !hasText;
+            elements.sendBtn.classList.toggle('opacity-50', !hasText);
+            autoResizeTextarea();
+        }
+
+        function handleKeydown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!elements.sendBtn.disabled) sendMessage();
+            }
+        }
+
+        function autoResizeTextarea() {
+            elements.messageInput.style.height = 'auto';
+            elements.messageInput.style.height = Math.min(elements.messageInput.scrollHeight, 120) + 'px';
+        }
+
+        async function sendMessage() {
+            const message = elements.messageInput.value.trim();
+            if (!message || isTyping) return;
+
+            // Add user message
+            addMessage('user', message);
+            elements.messageInput.value = '';
+            handleInput();
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            try {
+                const response = await callGeminiAPI(message);
+                hideTypingIndicator();
+                addMessage('ai', response);
+                
+                // Handle code commands
+                handleCodeCommands(response);
+                
+            } catch (error) {
+                hideTypingIndicator();
+                showError(error.message);
+            }
+        }
+
+        async function callGeminiAPI(message) {
+            const history = getChatHistory(currentChatId);
+            const context = history.map(msg => ({ role: msg.type, parts: [{ text: msg.content }] }));
+            context.push({ role: 'user', parts: [{ text: message }] });
+
+            const response = await fetch(`${CONFIG.API_URL}?key=${CONFIG.API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: context,
+                    generationConfig: {
+                        temperature: 0.7,
+                        topK: 40,
+                        topP: 0.95,
+                        maxOutputTokens: 2048,
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || 'API request failed');
+            }
+
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
+        }
+
+        function addMessage(type, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `max-w-2xl mx-auto ${type === 'user' ? 'justify-end' : ''}`;
+            
+            const bubbleClass = type === 'user' 
+                ? 'chat-bubble-user text-black p-5 shadow-xl' 
+                : 'chat-bubble-ai p-6';
+                
+            const icon = type === 'user' ? '👨' : '🤖';
+            const name = type === 'user' ? 'You' : 'CoderAI';
+            
+            messageDiv.innerHTML = `
+                <div class="${bubbleClass}">
+                    <div class="flex items-start space-x-3 ${type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}">
+                        <div class="w-8 h-8 bg-gradient-to-r from-${type === 'user' ? 'cyan-400' : 'cyan-400'} to-                        ${type === 'user' ? 'blue-500' : 'blue-500'} rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span class="text-sm">${icon}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-semibold mb-2 text-sm ${type === 'user' ? 'text-white' : 'text-cyan-400'}">${name}</h4>
+                            <p class="whitespace-pre-wrap text-sm leading-relaxed ${type === 'user' ? 'text-white' : 'text-gray-200'}">${formatMessage(content)}</p>
+                        </div>
                     </div>
                 </div>
             `;
-            chatDiv.appendChild(typingDiv);
-            chatDiv.scrollTop = chatDiv.scrollHeight;
+            
+            elements.messagesContainer.insertBefore(messageDiv, elements.welcomeMessage);
+            elements.messagesContainer.scrollTop = elements.messagesContainer.scrollHeight;
+            saveChatHistory(currentChatId, type, content);
         }
-        
-        function removeTypingIndicator() {
-            const typing = document.getElementById('typingIndicator');
-            if (typing) typing.remove();
+
+        function formatMessage(text) {
+            return text
+                .replace(/```(\w+)?\n([\s\S]*?)```/g, '<div class="code-highlight mt-4 p-4"><pre class="code-font text-xs overflow-x-auto"><code>$2</code></pre></div>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>');
         }
-        
+
+        function showTypingIndicator() {
+            isTyping = true;
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'max-w-2xl mx-auto';
+            typingDiv.innerHTML = `
+                <div class="chat-bubble-ai p-6">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span class="text-sm">🤖</span>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-cyan-400 mb-2 text-sm">CoderAI</h4>
+                            <p class="typing-dots text-gray-400 text-sm">Typing...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            elements.messagesContainer.appendChild(typingDiv);
+            elements.messagesContainer.scrollTop = elements.messagesContainer.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            isTyping = false;
+            const typingEl = elements.messagesContainer.querySelector('.typing-dots');
+            if (typingEl) typingEl.parentElement.parentElement.parentElement.remove();
+        }
+
+        function handleCodeCommands(response) {
+            const codeMatch = response.match(/```(?:html|javascript|css)?\s*([\s\S]*?)```/i);
+            if (codeMatch && isCodeMode) {
+                savedCode = codeMatch[1].trim();
+                displayCode(savedCode);
+                elements.codePreviewArea.classList.remove('hidden');
+                elements.messagesContainer.scrollTop = elements.messagesContainer.scrollHeight;
+            }
+        }
+
+        function displayCode(code) {
+            elements.codeDisplay.innerHTML = `<code>${escapeHtml(code)}</code>`;
+            elements.previewFrame.srcdoc = code.includes('<!DOCTYPE') ? code : `
+                <!DOCTYPE html>
+                <html>
+                <head><style>${code}</style></head>
+                <body>${code}</body>
+                </html>
+            `;
+        }
+
+        function toggleMode(codeMode) {
+            isCodeMode = codeMode;
+            elements.chatModeBtn.classList.toggle('opacity-50', codeMode);
+            elements.codeModeBtn.classList.toggle('opacity-50', !codeMode);
+            
+            if (codeMode) {
+                elements.chatModeBtn.innerHTML = '💬 Chat Mode';
+                elements.codeModeBtn.innerHTML = '💻 Code Mode <span class="ml-1 bg-cyan-500/20 px-2 py-1 rounded-full text-xs">ON</span>';
+            } else {
+                elements.chatModeBtn.innerHTML = '💬 Chat Mode <span class="ml-1 bg-cyan-500/20 px-2 py-1 rounded-full text-xs">ON</span>';
+                elements.codeModeBtn.innerHTML = '💻 Code Mode';
+            }
+            
+            elements.codePreviewArea.classList.toggle('hidden', !isCodeMode);
+        }
+
+        function newChat() {
+            currentChatId = Date.now().toString();
+            elements.messagesContainer.innerHTML = '';
+            elements.welcomeMessage.style.display = 'block';
+            elements.codePreviewArea.classList.add('hidden');
+            savedCode = '';
+            toggleSidebar();
+        }
+
+        function clearChat() {
+            if (confirm('Hapus semua chat?')) {
+                localStorage.removeItem(`coderai_chat_${currentChatId}`);
+                newChat();
+            }
+        }
+
+        function saveCode() {
+            localStorage.setItem('coderai_saved_code', savedCode);
+            showNotification('Kode disimpan!');
+        }
+
+        function togglePreview() {
+            elements.codePreviewArea.classList.toggle('hidden');
+        }
+
+        function getChatHistory(chatId) {
+            return JSON.parse(localStorage.getItem(`coderai_chat_${chatId}`) || '[]');
+        }
+
+        function saveChatHistory(chatId, type, content) {
+            const history = getChatHistory(chatId);
+            history.push({ type, content, timestamp: Date.now() });
+            
+            // Keep only last 50 messages
+            if (history.length > 50) history.splice(0, history.length - 50);
+            
+            localStorage.setItem(`coderai_chat_${chatId}`, JSON.stringify(history));
+            updateChatHistory(chatId);
+        }
+
+        function renderChatHistory() {
+            elements.chatHistory.innerHTML = '';
+            chatHistory.slice(-CONFIG.MAX_HISTORY).reverse().forEach(chat => {
+                const preview = chat.messages.slice(-1)[0]?.content.slice(0, 50) + '...';
+                const div = document.createElement('div');
+                div.className = 'chat-history-item p-3 bg-[#1e1e2a] rounded-xl cursor-pointer hover:bg-cyan-500/10 hover-scale border border-transparent hover:border-cyan-500/30 transition-all text-sm';
+                div.innerHTML = `
+                    <div class="font-medium text-cyan-400 truncate">${chat.title}</div>
+                    <div class="text-gray-400 truncate mt-1">${preview}</div>
+                `;
+                div.onclick = () => loadChat(chat.id);
+                elements.chatHistory.appendChild(div);
+            });
+        }
+
+        function updateChatHistory(chatId) {
+            const history = getChatHistory(chatId);
+            const existing = chatHistory.find(c => c.id === chatId);
+            
+            if (existing) {
+                existing.preview = history.slice(-1)[0]?.content.slice(0, 50) + '...';
+                existing.timestamp = Date.now();
+            } else {
+                chatHistory.push({
+                    id: chatId,
+                    title: `Chat ${chatHistory.length + 1}`,
+                    preview: history.slice(-1)[0]?.content.slice(0, 50) + '...',
+                    timestamp: Date.now(),
+                    messages: history
+                });
+            }
+            
+            // Keep only MAX_HISTORY
+            chatHistory = chatHistory
+                .sort((a, b) => b.timestamp - a.timestamp)
+                .slice(0, CONFIG.MAX_HISTORY);
+            
+            localStorage.setItem('coderai_chats', JSON.stringify(chatHistory));
+            renderChatHistory();
+        }
+
+        function loadChat(chatId) {
+            currentChatId = chatId;
+            const history = getChatHistory(chatId);
+            elements.messagesContainer.innerHTML = '';
+            elements.welcomeMessage.style.display = 'none';
+            
+            history.forEach(msg => addMessage(msg.type, msg.content));
+            toggleSidebar();
+        }
+
+        function showError(message) {
+            elements.errorMessage.textContent = `❌ ${message}`;
+            elements.errorMessage.classList.remove('hidden');
+            setTimeout(() => {
+                elements.errorMessage.classList.add('hidden');
+            }, 5000);
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500/20 border border-green-500/30 backdrop-blur-sm p-4 rounded-xl text-green-300 text-sm z-50 animate-pulse';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-        
-        function detectAndExecuteCode(content) {
-            // Deteksi kode HTML/JS/CSS
-            const htmlMatch = content.match(/```(?:html|javascript|js|css)?\n([\s\S]*?)```/i);
-            if (htmlMatch) {
-                return { type: 'code', code: htmlMatch[1] };
-            }
+
+        // Export chat
+        window.exportChat = function() {
+            const history = getChatHistory(currentChatId);
+            const content = history.map(msg => 
+                `${msg.type === 'user' ? 'You' : 'CoderAI'}: ${msg.content}\n\n`
+            ).join('');
             
-            // Deteksi perintah buat code
-            if (content.toLowerCase().includes('buat kode') || 
-                content.toLowerCase().includes('buat script') ||
-                content.toLowerCase().includes('tampilkan') && content.toLowerCase().includes('html')) {
-                return { type: 'generate_code', query: content };
-            }
-            
-            // Deteksi cari paper
-            if (content.toLowerCase().includes('cari paper') || 
-                content.toLowerCase().includes('search paper')) {
-                return { type: 'search_paper', query: content };
-            }
-            
-            return { type: 'chat', query: content };
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `coderai-chat-${currentChatId}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        // Load saved code on init
+        const saved = localStorage.getItem('coderai_saved_code');
+        if (saved && isCodeMode) {
+            displayCode(saved);
         }
-        
-        async function searchSemanticScholar(query) {
-            // Extract keyword dari query
-            let keyword = query.replace(/cari paper|search paper|tentang|paper/i, '').trim();
-            if (!keyword) keyword = 'artificial intelligence';
-            
-            const apiUrl = `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(keyword)}&limit=5&fields=title,authors,year,citationCount,url`;
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
-            
-            try {
-                const res = await fetch(proxyUrl);
-                const data = await res.json();
-                const result = JSON.parse(data.contents);
-                
-                if (!result.data || result.data.length === 0) {
-                    return `Tidak ada paper ditemukan untuk "${keyword}". Coba kata kunci lain.`;
-                }
-                
-                let response = `📚 **Hasil pencarian paper untuk "${keyword}":**\n\n`;
-                for (let i = 0; i < result.data.length; i++) {
-                    const p = result.data[i];
-                    response += `${i+1}. **${p.title || 'No title'}**\n`;
-                    response += `   👥 ${p.authors?.map(a => a.name.split(' ').pop()).join(', ') || 'Unknown'}\n`;
-                    response += `   📊 ${p.citationCount || 0} sitasi | 📅 ${p.year || 'N/A'}\n`;
-                    response += `   🔗 ${p.url || '#'}\n\n`;
-                }
-                return response;
-            } catch (err) {
-                return `Error mencari paper: ${err.message}. Coba lagi nanti.`;
-            }
-        }
-        
-        async function generateCodeResponse(prompt) {
-            // Simple code generator based on prompt
-            if (prompt.toLowerCase().includes('kalkulator')) {
-                return {
-                    code: `<div style="background:#1a1a2e; padding:20px; border-radius:12px; max-width:300px; margin:0 auto;">
-    <h3 style="color:white; margin-bottom:15px;">Kalkulator Sederhana</h3>
-    <input type="number" id="num1" placeholder="Angka 1" style="width:100%; padding:8px; margin-bottom:10px; border-radius:6px;">
-    <input type="number" id="num2" placeholder="Angka 2" style="width:100%; padding:8px; margin-bottom:10px; border-radius:6px;">
-    <div style="display:flex; gap:10px; margin-bottom:15px;">
-        <button onclick="calc('+')" style="background:#3b82f6; padding:8px 15px; border-radius:6px;">+</button>
-        <button onclick="calc('-')" style="background:#3b82f6; padding:8px 15px; border-radius:6px;">-</button>
-        <button onclick="calc('*')" style="background:#3b82f6; padding:8px 15px; border-radius:6px;">×</button>
-        <button onclick="calc('/')" style="background:#3b82f6; padding:8px 15px; border-radius:6px;">÷</button>
-    </div>
-    <div id="result" style="background:#0a0a0f; padding:10px; border-radius:6px; color:#10b981; font-weight:bold;">Hasil: -</div>
-</div>
-<script>
-function calc(op) {
-    let n1 = parseFloat(document.getElementById('num1').value);
-    let n2 = parseFloat(document.getElementById('num2').value);
-    let result;
-    if(op === '+') result = n1 + n2;
-    else if(op === '-') result = n1 - n2;
-    else if(op === '*') result = n1 * n2;
-    else if(op === '/') result = n2 !== 0 ? n1 / n2 : 'Error';
-    document.getElementById('result').innerHTML = 'Hasil: ' + (isNaN(result) ? 'Masukkan angka' : result);
-}
-</script>`,
-                    desc: "Saya buatkan kalkulator sederhana yang bisa langsung dipake di bawah ini:"
-                };
-            }
-            
-            if (prompt.toLowerCase().includes('jam digital')) {
-                return {
-                    code: `<div style="background:#1a1a2e; padding:30px; border-radius:16px; text-align:center;">
-    <div style="font-size:48px; font-family:monospace; color:#10b981;" id="clock">--:--:--</div>
-    <p style="color:gray; margin-top:15px;">Jam Digital</p>
-</div>
-<script>
-function updateClock() {
-    const now = new Date();
-    document.getElementById('clock').innerHTML = now.toLocaleTimeString('id-ID');
-}
-setInterval(updateClock, 1000);
-updateClock();
-</script>`,
-                    desc: "Jam digital siap pakai:"
-                };
-            }
-            
-            return {
-                code: `<div style="background:#1a1a2e; padding:20px; border-radius:12px; text-align:center; color:white;">
-    <i class="fas fa-code" style="font-size:48px; margin-bottom:15px;"></i>
-    <p>Kode HTML/CSS/JS bisa langsung dijalankan di sini.</p>
-    <p class="text-sm text-gray-400 mt-2">Kirim prompt lebih spesifik: "buat kalkulator", "buat jam digital", "buat todo list"</p>
-</div>`,
-                desc: "Saya siap bikin kode untuk kamu. Coba kirim:"
-            };
-        }
-        
-        async function sendMessage() {
-            if (isProcessing) return;
-            
-            const input = document.getElementById('userInput');
-            const message = input.value.trim();
-            if (!message) return;
-            
-            input.value = '';
-            addMessage(message, true);
-            isProcessing = true;
-            addTypingIndicator();
-            
-            setTimeout(async () => {
-                try {
-                    const detection = detectAndExecuteCode(message);
-                    let response = '';
-                    let codeToShow = null;
-                    
-                    if (detection.type === 'search_paper') {
-                        response = await searchSemanticScholar(detection.query);
-                        removeTypingIndicator();
-                        addMessage(response, false);
-                    } 
-                    else if (detection.type === 'generate_code') {
-                        const { code, desc } = await generateCodeResponse(detection.query);
-                        codeToShow = code;
-                        response = desc + '\n\n```html\n' + code + '\n```\n\n📱 **Kode di atas bisa langsung dijalankan. Copy paste ke file .html atau coba di bawah ini:**';
-                        removeTypingIndicator();
-                        addMessage(response, false);
-                        // Tampilkan preview code di chat
-                        const previewDiv = document.createElement('div');
-                        previewDiv.className = 'mt-2 p-3 bg-gray-800/50 rounded-xl';
-                        previewDiv.innerHTML = `<div class="text-xs text-gray-400 mb-2"><i class="fas fa-eye"></i> Preview:</div>${code}`;
-                        document.getElementById('chatMessages').appendChild(previewDiv);
-                    }
-                    else if (detection.type === 'code') {
-                        codeToShow = detection.code;
-                        response = `💻 **Kode yang dieksekusi:**\n\n\`\`\`html\n${detection.code}\n\`\`\``;
-                        removeTypingIndicator();
-                        addMessage(response, false);
-                        const previewDiv = document.createElement('div');
-                        previewDiv.className = 'mt-2 p-3 bg-gray-800/50 rounded-xl';
-                        previewDiv.innerHTML = `<div class="text-xs text-gray-400 mb-2"><i class="fas fa-play"></i> Hasil eksekusi:</div>${detection.code}`;
-                        document.getElementById('chatMessages').appendChild(previewDiv);
-                    }
-                    else {
-                        // Default chat response
-                        response = `Halo! Saya Ryee.GPT AI. Saya bisa bantu:\n\n• **Buat kode HTML/JS/CSS** - Kirim "buat kalkulator" atau "buat jam digital"\n• **Cari paper akademik** - Kirim "cari paper tentang AI" atau "search paper quantum"\n• **Jalankan script** - Kirim kode dalam format \`\`\`html ... \`\`\`\n\nCoba sekarang!`;
-                        removeTypingIndicator();
-                        addMessage(response, false);
-                    }
-                } catch (err) {
-                    removeTypingIndicator();
-                    addMessage(`Error: ${err.message}`, false);
-                }
-                isProcessing = false;
-                document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
-            }, 500);
-        }
-        
-        function clearChat() {
-            const chatDiv = document.getElementById('chatMessages');
-            chatDiv.innerHTML = `
-                <div class="flex gap-3">
-                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-robot text-white text-xs"></i>
-                    </div>
-                    <div class="message-ai rounded-2xl px-5 py-3 max-w-[85%]">
-                        <p class="text-gray-200">Chat dibersihkan. Kirim pesan baru!</p>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // Enter to send
-        document.getElementById('userInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
     </script>
 </body>
 </html>
